@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Satan.az — Pulsuz Elanlar Saytı — Maşın, Ev, Telefon, Geyim, Mebel — Bakı, Azərbaycan",
-  description: "Satan.az – pulsuz elanlar, geniş imkanlar! Avtomobillər, Daşınmaz əmlak, Telefonlar, Xidmətlər – almaq və satmaq heç vaxt bu qədər asan olmayıb! ",
+  title:
+    "Satan.az — Pulsuz Elanlar Saytı — Maşın, Ev, Telefon, Geyim, Mebel — Bakı, Azərbaycan",
+  description:
+    "Satan.az – pulsuz elanlar, geniş imkanlar! Avtomobillər, Daşınmaz əmlak, Telefonlar, Xidmətlər – almaq və satmaq heç vaxt bu qədər asan olmayıb! ",
 };
 
 export default function RootLayout({
@@ -27,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <>{children}</>
       </body>
     </html>
   );
