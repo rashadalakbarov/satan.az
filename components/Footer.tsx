@@ -17,7 +17,7 @@ export default async function Footer() {
 
   return (
     <div className="container">
-      <footer className="py-3 my-4">
+      <footer className="pt-3 mt-4">
         <ul className="nav justify-content-center border-bottom pb-3 mb-3">
           <li className="nav-item">
             <Link href="#" className="nav-link px-2 text-body-secondary">
@@ -84,7 +84,7 @@ export default async function Footer() {
           </ul>
         </div>
         <div className="my-3 py-2 border-top text-center">
-          <p>
+          <p className="mb-0 text-secondary">
             Saytın Administrasiyası reklam bannerlərinin və yerləşdirilmiş
             elanların məzmununa görə məsuliyyət daşımır.
           </p>

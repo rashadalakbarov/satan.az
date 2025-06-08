@@ -28,8 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <>{children}</>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} d-flex flex-column min-vh-100`}
+      >
+        {children}
       </body>
     </html>
   );

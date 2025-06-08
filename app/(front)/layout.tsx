@@ -10,7 +10,9 @@ const FrontLayout = ({ children }: FrontLayoutProps) => {
   return (
     <div>
       <Navbar />
-      <div className="container my-3">{children}</div>
+      <main className="flex-fill">
+        <div className="container my-3">{children}</div>
+      </main>
       <Footer />
     </div>
   );

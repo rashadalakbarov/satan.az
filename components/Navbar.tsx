@@ -6,6 +6,7 @@ import { SiteSettings } from "@/ts/types";
 import Link from "next/link";
 
 import { FaSearch } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 
 export default async function Navbar() {
   const settings: SiteSettings | null = await getApi("configs");
@@ -22,7 +23,7 @@ export default async function Navbar() {
           <button className="navbar-toggler me-2" type="button">
             <span className="navbar-toggler-icon"></span>
           </button>
-          <Link className="navbar-brand" href="#">
+          <Link className="navbar-brand" href="/">
             <Image
               src={logoSrc}
               alt="Bootstrap"
@@ -34,18 +35,27 @@ export default async function Navbar() {
           </Link>
         </div>
 
-        <form className="d-flex position-relative" role="search">
-          <div className="input-group">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Axtar ..."
-            />
-            <span className="input-group-text bg-white">
-              <FaSearch />
-            </span>
-          </div>
-        </form>
+        <div className="d-flex align-items-center justify-content-center">
+          <form className="d-flex position-relative" role="search">
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Axtar ..."
+              />
+              <span className="input-group-text bg-white">
+                <FaSearch />
+              </span>
+            </div>
+          </form>
+          <Link
+            href={"/yeni-elan"}
+            className="btn btn-success text-capitalize ms-2"
+          >
+            <FaPlus className="me-2" />
+            Yeni elan
+          </Link>
+        </div>
       </div>
     </nav>
   );
