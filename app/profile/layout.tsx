@@ -31,7 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} d-flex flex-column min-vh-100`}
       >
-        {children}
+        <div className="container">{children}</div>
       </body>
     </html>
   );
