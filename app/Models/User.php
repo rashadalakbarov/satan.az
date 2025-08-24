@@ -19,8 +19,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
-        'password',
+        'activate',
+        'status',
+        'phone',
+        'password',        
     ];
 
     /**
@@ -31,6 +35,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'phone',
+        'profile',
+        'status',
+        'username',
+        'activate',
     ];
 
     /**
@@ -45,4 +54,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // public function elanlar() {
+    //     return $this->hasMany(Elan::class); // Ad modeli varsa
+    // }
 }
