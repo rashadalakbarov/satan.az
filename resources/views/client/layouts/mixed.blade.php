@@ -1,4 +1,4 @@
-'title'<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
     <head>
         <!-- Montserrat fonts include -->
