@@ -2,9 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\HomeController;
+
 // for admin
 use App\Http\Controllers\admin\AdminAuthController;
 use App\Http\Controllers\admin\AdminDashboardController;
+
+Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Route::prefix('admin')->name('admin.')->group(function(){
     Route::group(['middleware'=> 'admin.guest'], function(){
