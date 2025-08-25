@@ -26,7 +26,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $company = [
                 'name' => Config::get('site_name'),
-                'logo' => Config::get('logo_url'),
+                'logo' => Config::get('logo'),
+                'favicon' => Config::get('favicon'),
                 'about' => Config::get('about'),
             ];
 

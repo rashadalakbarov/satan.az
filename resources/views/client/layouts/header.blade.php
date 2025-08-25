@@ -2,7 +2,7 @@
     <div class="container">
         <div class="navbar-container">
             <a href="{{route('index')}}" class="brand">
-                <img src="{{ isset($company['logo']) ? asset('/' . $company['logo']) : asset('admin/assets/img/default/logo.png') }}" alt="{{ $company['name'] ?? 'Satan.az' }}">
+                <img src="{{ isset($company['logo']) ? asset('/storage/logo/' . $company['logo']) : asset('front/assets/img/logo.png') }}" alt="{{ $company['name'] ?? 'Satan.az' }}">
             </a>
             <div class="button-container">
                 <a href="bookmark" class="heart"><i class="far fa-heart"></i></a>
@@ -28,7 +28,7 @@
             @foreach ($categories as $cat)
                 <div class="cat-item">
                     <a href="{{ url('elanlar/' . $cat->seflink) }}">
-                        <img src="{{ asset('storage/categories/' . $cat->image) }}" alt="{{ $cat->seflink }}">
+                        <img src="{{ isset($cat->image) ? asset('/storage/categories/' . $cat->image) : asset('front/assets/img/categories/default.png') }}" alt="{{ $cat->seflink }}">
                         {{ $cat->title }}
                     </a>
                 </div>

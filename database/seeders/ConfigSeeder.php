@@ -16,7 +16,8 @@ class ConfigSeeder extends Seeder
     {
         $settings = [
             ['key' => 'site_name',       'value' => 'Satan.az',                    'extra' => '',               'type' => 'about'],
-            ['key' => 'logo_url',        'value' => 'storage/logo/logo.png',       'extra' => '',               'type' => 'about'],
+            ['key' => 'logo',            'value' => 'logo.png',                    'extra' => '',               'type' => 'about'],
+            ['key' => 'favicon',         'value' => 'favicon.png',                 'extra' => '',               'type' => 'about'],
             ['key' => 'facebook_url',    'value' => 'https://facebook.com/satan',  'extra' => 'fa-facebook-f',  'type' => 'social'],
             ['key' => 'instagram_url',   'value' => 'https://instagram.com/satan', 'extra' => 'fa-instagram',   'type' => 'social'],  
             ['key' => 'phone',           'value' => '+99455 821 56 73',            'extra' => '',               'type' => 'contact'],

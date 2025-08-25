@@ -17,7 +17,7 @@
 
         <!-- Title & Favicon -->
         <title>{{ $company['name'] ?? "Satan.az" }} | @yield('title', 'Pulsuz Elanlar Saytı')</title>
-        <link rel="shortcut icon" href="{{ isset($company['logo']) ? asset('/' . $company['logo']) : asset('admin/assets/img/default/logo.png') }}" type="image/jpg">
+        <link rel="shortcut icon" href="{{ isset($company['favicon']) ? asset('/storage/favicon/' . $company['favicon']) : asset('front/assets/img/favicon.png') }}" type="image/jpg">
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
