@@ -6,8 +6,25 @@
             </a>
             <div class="button-container">
                 <a href="bookmark" class="heart"><i class="far fa-heart"></i></a>
-                <a href="" class="heart"><i class="fas fa-user-circle"></i></a>
-                <a href="" class="btn btn-success ctmBorder">
+                
+
+                @if(Auth::guard('phone')->check())                
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle ms-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle fs-5"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{route('profile.index')}}">Şəxsi kabinet</a></li>
+                        <li>
+                            <a class="dropdown-item" href="{{route('profile.logout')}}">Çıxış</a>
+                        </li>
+                    </ul>
+                </div>
+                @else
+                    <a href="{{route('login')}}" class="heart"><i class="fas fa-user-circle"></i></a>
+                @endif
+
+                <a href="" class="btn btn-success ctmBorder ms-2">
                     <i class="fas fa-plus"></i> Elan yarat
                 </a>
             </div>

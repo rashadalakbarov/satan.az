@@ -6,7 +6,7 @@
                 title: 'Təbriklər!',
                 autohide: true,
                 delay: 4000,
-                body: '{{ Session::get('success') }}',
+                body: @json(session('success')),
                 width: 500
             });
         @endif
@@ -17,7 +17,7 @@
                 title: 'Oops!',
                 autohide: true,
                 delay: 4000,
-                body: '{{ Session::get('error') }}',
+                body: @json(session('error')),
                 width: 500
             });
         @endif

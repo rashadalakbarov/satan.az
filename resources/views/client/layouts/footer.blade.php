@@ -31,8 +31,8 @@
                     ?>
                     <ul class="custom">
                         <li><a href="{{ route('index') }}" class="text-decoration-none">Ana Səhifə</a></li>
-                        <li><a href="" class="text-decoration-none">Haqqımızda</a></li>
-                        <li><a href="" class="text-decoration-none">Qaydalar</a></li>
+                        <li><a href="{{route('about')}}" class="text-decoration-none {{ request()->routeIs('about') ? 'text-danger' : '' }}">Haqqımızda</a></li>
+                        <li><a href="{{route('rules')}}" class="text-decoration-none {{ request()->routeIs('rules') ? 'text-danger' : '' }}">Qaydalar</a></li>
                         <li><a href="" class="text-decoration-none">Əlaqə</a></li>
                     </ul>
                 </div>

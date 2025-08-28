@@ -41,11 +41,15 @@
         <!-- Main CSS -->
         <link rel="stylesheet" href="{{asset('')}}front/assets/css/style.css">
         <link rel="stylesheet" href="{{asset('')}}front/assets/css/responsive.css">
+
+        @yield('css')
     </head>
     <body>
         @include('client.layouts.header')
 
-        @yield('content')
+        <div class="container">
+            @yield('content')
+        </div>
 
         @include('client.layouts.footer')
 
@@ -65,7 +69,14 @@
         <script src="{{asset('')}}front/assets/plugins/OwlCarousel2-2.3.4/owl.carousel.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <!-- Main JS (bütün gizli kodlar burdadır) -->
         <script src="{{asset('')}}front/assets/js/main.min.js"></script>
+
+        <x-sweet-alert2 />
+
+        @yield('javascript')
     </body>
 </html>

@@ -62,6 +62,7 @@
         <!-- ./wrapper -->
 
         <x-alert-messages />
+        <!-- <x-sweet-alert2 type="adminlte" /> -->
 
         <!-- jQuery -->
         <script src="{{asset('')}}admin/assets/plugins/jquery/jquery.min.js"></script>
