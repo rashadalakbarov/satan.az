@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use App\Models\City;
+use App\Models\Elan;
 use App\Models\Category;
 use App\Models\Option;
 use App\Models\OptionValue;
@@ -27,7 +29,9 @@ class AddNewController extends Controller
         ->limit(7)
         ->get();
 
-        return view('client.new', compact('mainCategories', 'all_lists'));
+        $cities = City::orderBy('name', 'ASC')->get();
+
+        return view('client.new', compact('mainCategories', 'all_lists', 'cities'));
     }
 
     public function getOptions($category_id) {
@@ -58,6 +62,22 @@ class AddNewController extends Controller
                 'required',
                 'regex:/^0[0-9]{9}$/'
             ],
+            'selectCity' => 'required|exists:cities,id',
+            'inputElanTitle' => [
+                'required',
+                'string',
+                'min:3',
+                'regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ0-9\s-]+$/u' // JS regex-in eyni forması
+            ],
+            'inputPrice' => [
+                'required',
+                'regex:/^[0-9]+$/', // yalnız rəqəm
+            ],
+            'textareaAdd' => [
+                'required',
+                'string',
+                'min:15', // minimum 15 simvol
+            ],
         ], [
             'inputName.required' => 'Ad daxil edilməlidir.',
             'inputName.min' => 'Ad ən azı 2 simvol olmalıdır.',
@@ -68,6 +88,19 @@ class AddNewController extends Controller
             
             'inputPhone.required' => 'Telefon nömrəsi daxil edin.',
             'inputPhone.regex' => 'Telefon 10 rəqəmli olmalı, 0 ilə başlamalı və yalnız rəqəmlərdən ibarət olmalıdır.',
+
+            'selectCity.required' => 'Şəhər seçilməlidir.',
+            'selectCity.exists' => 'Seçilən şəhər mövcud deyil.',
+
+            'inputElanTitle.required' => 'Elan adı daxil edilməlidir.',
+            'inputElanTitle.min' => 'Elan adı ən azı 3 simvol olmalıdır.',
+            'inputElanTitle.regex' => "Elan adı yalnız hərf, rəqəm, boşluq və '-' işarəsi ola bilər.",
+
+            'inputPrice.required' => 'Qiymət boş ola bilməz.',
+            'inputPrice.regex' => 'Qiymət yalnız rəqəmlərdən ibarət olmalıdır.',
+
+            'textareaAdd.required' => 'Məzmun daxil edilməlidir.',
+            'textareaAdd.min' => 'Məzmun ən azı 15 simvol olmalıdır.',
         ]);
 
         if ($validator->fails()) {
@@ -95,6 +128,15 @@ class AddNewController extends Controller
 
             $user_id = $user->id;
         }
+
+        // Elan create
+        $elan = new Elan();
+        $elan->user_id = $user_id;
+        $elan->title = $request->inputElanTitle;
+        $elan->price =  $request->inputPrice;
+        $elan->city_id = $request->selectCity;
+        $elan->description = $request->textareaAdd;
+        $elan->save();
 
         // Başarılı durum: veri kaydet veya başka işlem
         return response()->json([
