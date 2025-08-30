@@ -24,7 +24,7 @@
                     <a href="{{route('login')}}" class="heart"><i class="fas fa-user-circle"></i></a>
                 @endif
 
-                <a href="" class="btn btn-success ctmBorder ms-2">
+                <a href="{{route('new.index')}}" class="btn btn-success ctmBorder ms-2">
                     <i class="fas fa-plus"></i> Elan yarat
                 </a>
             </div>

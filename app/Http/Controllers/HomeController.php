@@ -15,10 +15,13 @@ class HomeController extends Controller
     public function about(){
         return view('client.about');
     }
-
     public function rules(){
         $all_lists = RuleCompany::with('children')->whereNull('parent_id')->where('activate', "active")->get();
 
         return view('client.rules', compact('all_lists'));
+    }
+
+    public function contact(){
+        return view('client.contact');
     }
 }

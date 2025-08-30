@@ -31,6 +31,7 @@ use App\Http\Controllers\admin\AdminRulesCompany;
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/rules', [HomeController::class, 'rules'])->name('rules');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
 Route::prefix('new')->controller(AddNewController::class)->name('new.')->group(function(){
     Route::get('/', 'index')->name('index');    
@@ -44,6 +45,7 @@ Route::get('/elanlar', [DetailController::class, 'index'])->name('detail');
 Route::controller(AuthController::class)->middleware(['profile.guest'])->group(function(){
     Route::get('/login', 'index')->name('login');
     Route::post('/send-otp', 'sendOtp')->name('send-otp');
+    Route::get('/verify-otp', 'verifyOtpForm')->name('verify-otp.form');
     Route::post('/verify-otp', 'verifyOtp')->name('verify-otp');
 });
 

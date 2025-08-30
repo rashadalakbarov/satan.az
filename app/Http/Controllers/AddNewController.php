@@ -1,22 +1,33 @@
 <?php
 
-namespace App\Http\Controllers\front;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Option;
 use App\Models\OptionValue;
 use App\Models\ElanOption;
+
+use App\Models\RuleCompany;
 
 use Illuminate\Support\Facades\Validator;
 
 class AddNewController extends Controller
 {
     public function index(){
-        $mainCategories = Category::whereNull('parent_id')->where('activate', 'active')->with('children')->get();
-        return view('front.new', compact('mainCategories'));
+        $mainCategories = Category::whereNull('parent_id')
+        ->where('activate', 1)
+        ->with('children')
+        ->get();
+        
+        $all_lists = RuleCompany::whereNotNull('parent_id')
+        ->where('activate', "active")
+        ->limit(7)
+        ->get();
+
+        return view('client.new', compact('mainCategories', 'all_lists'));
     }
 
     public function getOptions($category_id) {
@@ -35,83 +46,60 @@ class AddNewController extends Controller
     }
 
     public function store(Request $request) {
-        // Kategori zorunlu
-       $validator = Validator::make($request->all(), [
-            'category_id' => 'required|exists:categories,id',
+        $validator = Validator::make($request->all(), [
+            'inputName' => [
+                'required',
+                'string',
+                'min:2',
+                'regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ\s]+$/u' // AZ/EN harfleri ve boşluk
+            ],
+            'inputEmail' => 'required|email',
+            'inputPhone' => [
+                'required',
+                'regex:/^0[0-9]{9}$/'
+            ],
         ], [
+            'inputName.required' => 'Ad daxil edilməlidir.',
+            'inputName.min' => 'Ad ən azı 2 simvol olmalıdır.',
+            'inputName.regex' => 'Ad yalnız hərf və boşluqlardan ibarət olmalıdır.',
 
-            'category_id.required' => 'Kateqoriyanın adı boş buraxılmamalıdır.',
-            'category_id.exists' => 'Seçilən kateqoriya mövcud deyil.',
+            'inputEmail.required' => 'Email daxil edin.',
+            'inputEmail.email' => 'Email düzgün formatda olmalıdır.',
+            
+            'inputPhone.required' => 'Telefon nömrəsi daxil edin.',
+            'inputPhone.regex' => 'Telefon 10 rəqəmli olmalı, 0 ilə başlamalı və yalnız rəqəmlərdən ibarət olmalıdır.',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
-        
-        // return back()->withErrors($validator)->withInput();
 
+        // Telefon formatlama: 0555555555 → +99455 555 55 55
+        $phone = preg_replace('/\D/', '', $request->inputPhone); // sadece rakamlar
+        if (substr($phone, 0, 1) === '0') {
+            $phone = substr($phone, 1); // baştaki 0’ı çıkar
+        }
+        $formattedPhone = '+994' . substr($phone, 0, 2) . ' ' . substr($phone, 2, 3) . ' ' . substr($phone, 5, 2) . ' ' . substr($phone, 7, 2);
 
+        //  Email kontrolü
+        $user_existing = User::where('email', $request->inputEmail)->first();
 
+        if ($user_existing) {
+            $user_id = $user_existing->id;
+        } else {
+            $user = User::create([
+                'name' => $request->inputName,
+                'email' => $request->inputEmail,
+                'phone' => $formattedPhone,
+            ]);
 
-        // // Seçilen kategoriye ait option'ları al
-        // $options = Option::where('category_id', $request->category_id)->get();
+            $user_id = $user->id;
+        }
 
-        // // Dinamik validation kuralları
-        // $dynamicRules = [];
-
-        // foreach ($options as $option) {
-        //     $fieldKey = 'option_' . $option->id;
-
-        //     if ($option->required == 1) {
-        //         $dynamicRules[$fieldKey] = $option->type == 'check' ? 'accepted' : 'required|string';
-        //     }
-        // }
-
-        // // Dinamik alanlar için doğrulama
-
-        // $validator = Validator::make($request->all(), $dynamicRules);
-
-        // if ($validator->fails()) {
-        //     // Eğer AJAX isteğiyse JSON ile hata dön
-        //     if ($request->ajax()) {
-        //         return response()->json([
-        //             'status' => 'error',
-        //             'errors' => $validator->errors(),
-        //         ], 422);
-        //     }
-
-        //     return back()->withErrors($validator)->withInput();
-        // } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // Her option için kayıt oluştur
-        // foreach ($options as $option) {
-        //     $fieldKey = 'option_' . $option->id;
-
-        //     if ($request->has($fieldKey)) {
-        //         ElanOption::create([
-        //             'elan_id' => 1, // burayi daha sonra dinamik et
-        //             'category_id' => $request->category_id,
-        //             'option_id' => $option->id,
-        //             'value' => $request->input($fieldKey),
-        //         ]);
-        //     }
-        // }
-
-        return redirect()->back()->with('success', 'Elan uğurla əlavə edildi!');
+        // Başarılı durum: veri kaydet veya başka işlem
+        return response()->json([
+            'message' => 'Form uğurla göndərildi!',
+            'user_id' => $user_id
+        ]);
     }
 }

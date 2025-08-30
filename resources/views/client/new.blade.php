@@ -1,203 +1,92 @@
-@extends('front.layout.mixed')
+@extends('client.layouts.mixed')
 
 @section('content')
-<div class="border py-5 rounded">
-    <h1 class="fs-3 my-4 text-center">Yeni elan</h1>
-
-    <form action="{{ route('new.store') }}" method="POST" autocomplete="off">
-        @csrf
-        <div class="d-flex justify-content-center">
-            <div class="card w-50 mt-4">
-                <div class="card-body">
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label for="categorySelect" class="form-label">Kateqoriyalar</label>
-                            <select class="form-select" name="category_id" id="categorySelect">
-                                <option value="">Kateqoriya axtar ...</option>
-                                @foreach($mainCategories as $main)
-                                    <optgroup label="{{ $main->name }}">
-                                        @foreach($main->children as $sub)
-                                            <option value="{{ $sub->id }}">{{ $sub->name }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                             @error('category_id') <small class="text-red-500" id="error_category_id">{{ $message }}</small> @enderror
-                        </div>
+<section style="margin-top:31px">
+    <div class="container">
+        <div class="row mb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0" style="background-color: transparent; margin-left: 15px;">
+                    <li class="breadcrumb-item"><a href="index" class="text-capitalize text-decoration-none"><i class="fas fa-home"></i> Ana səhifə</a></li>
+                    <li class="breadcrumb-item active text-capitalize" aria-current="page">Yeni Elan</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-12 col-xl-8 order-2 order-xl-1">
+                <form id="myForm">
+                    @csrf
+                    <div class="form-group mb-3">
+                        <label for="inputName">Adınız</label>
+                        <input type="text" class="form-control name" id="inputName" name="inputName" placeholder="Adınızı daxil edin" minlength="2">
+                        <div class="text-danger" id="errInputName"></div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="inputEmail">Email</label>
+                        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" name="inputEmail" placeholder="Email addresinizi daxil edin">
+                        <small id="emailHelp" class="form-text text-muted">E-poçtunuzu heç vaxt başqası ilə bölüşməyəcəyik.</small>
+                        <div class="text-danger" id="errInputEmail"></div>
                     </div>
 
-                    <!-- Dinamik Option Alanları -->
-                    <div id="dynamicOptions" class="row gy-3"></div>
-
-                    <div class="mt-4 text-center">
-                        <button type="submit" class="btn btn-primary">Elanı əlavə et</button>
+                    <div class="form-group mb-3">
+                        <label for="inputPhone">Telefon</label>
+                        <input type="tel" class="form-control" id="inputPhone" name="inputPhone" placeholder="Nümunə: 0501234567"  maxlength="10" minlength="10" pattern="0[0-9]{9}">
+                        <div class="text-danger" id="errInputPhone"></div>
+                    </div>
+                    <hr style="margin:30px 0">
+                    <p class="mt-3">Siz elan yerləşdirərkən satan.az saytının <a href="rules">qaydalarıyla</a> razı olduğunuzu təsdiqləmiş olursunuz.</p>
+                    <button type="submit" class="btn btn-primary text-capitalize custom-button">Elanı yarat</button>
+                </form>
+            </div>
+            <div class="d-none d-xl-block col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4 order-1 order-xl-2 mb-3">
+                <div class="card add-rules">
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase position-relative mb-3 rulers">Qısa QAYDALAR</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Qaydalara riayət edin</h6>
+                        <ul>
+                            @foreach($all_lists as $item)
+                                <li>{{$item->title}}</li>           
+                            @endforeach
+                        </ul>
+                        <a href="{{route('rules')}}" class="card-link">Saytın tam qaydaları</a>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
-</div>
+    </div>
+</section>
 @endsection
 
 @section('javascript')
 <script>
-$(document).ready(function () {
+$(document).ready(function() {
+    $('#myForm').submit(function(e) {
+        e.preventDefault(); // Formun normal submit olmasını engelle
 
-    $('#categorySelect').on('change', function () {
-        $("#error_category_id").remove();
+         // Tüm hata mesajlarını temizle
+        $('.text-danger').text('');
 
-        let categoryId = $(this).val();
-
-        $('#dynamicOptions').html('<div class="text-muted">Yüklənir...</div>');
-
-        if (categoryId) {
-            $.ajax({
-                url: `/new/get-options/${categoryId}`,
-                type: 'GET',
-                success: function (options) {
-                    let html = '';
-
-                    options.forEach(option => {
-                        if (option.type === 'check' && option.activate === 'active') {
-                            html += `
-                                <div class="col-md-3">
-                                    <div class="form-check mb-1">
-                                        <input class="form-check-input" type="checkbox" name="option_${option.id}" value="1" id="option${option.id}" ${option.required === '1' ? 'required' : ''}>
-                                        <label class="form-check-label" for="option${option.id}">
-                                            ${option.title}
-                                        </label>
-                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                            `;
-                        } else if (option.type === 'select' && option.activate === 'active') {
-                            html += `
-                                <div class="col-12">
-                                    <div class="mb-1">
-                                        <label class="form-label" for="option${option.id}">${option.title} ${option.required === '1' ? '<span class="text-danger">*</span>' : ''}</label>
-                                        <select class="form-select option-select" name="option_${option.id}" id="option${option.id}" data-option-id="${option.id}" ${option.required === '1' ? 'required' : ''}>
-                                            <option value="">Yüklənir...</option>
-                                        </select>
-                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            html += `
-                                <div class="col-12">
-                                    <div class="mb-1">
-                                        <label class="form-label" for="option${option.id}">${option.title} ${option.required === '1' ? '<span class="text-danger">*</span>' : ''}</label>
-                                        <input type="text" class="form-control" name="option_${option.id}" id="option${option.id}" ${option.required === '1' ? 'required' : ''}>
-                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    $('#dynamicOptions').html(html);
-
-                    // select alanlar yüklendikten sonra suboptionları getir
-                    $('.option-select').each(function () {
-                        let optionId = $(this).data('option-id');
-                        let selectElement = $(this);
-
-                        $.ajax({
-                            url: `/new/get-option-values/${optionId}`,
-                            type: 'GET',
-                            success: function (values) {
-                                let optionsHtml = `<option value="">Seçin</option>`;
-                                values.forEach(val => {
-                                    optionsHtml += `<option value="${val}">${val}</option>`;
-                                });
-                                selectElement.html(optionsHtml);
-                            },
-                            error: function () {
-                                selectElement.html('<option value="">Xəta baş verdi</option>');
-                            }
-                        });
-                    });
-
-                },
-                error: function () {
-                    $('#dynamicOptions').html('<div class="text-danger">Optionlar gətirilərkən xəta baş verdi.</div>');
+        $.ajax({
+            url: '{{ route("new.store") }}', // Controller route
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                alert(response.message); // Başarılı mesaj
+                $('#myForm')[0].reset();
+            },
+            error: function(xhr) {
+                if (xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    if (errors.inputName) $('#errInputName').text(errors.inputName[0]);
+                    if (errors.selectUser) $('#errSelectUser').text(errors.selectUser[0]);
+                    if (errors.inputPhone) $('#errInputPhone').text(errors.inputPhone[0]);
+                    if (errors.inputEmail) $('#errInputEmail').text(errors.inputEmail[0]);
+                } else {
+                    alert('Xəta baş verdi, yenidən cəhd edin.');
                 }
-            });
-        } else {
-            $('#dynamicOptions').html('');
-        }
-    });
-
-});
-
-
-$('form').on('submit', function (e) {
-    e.preventDefault(); // sayfa yenilemesini engelle
-
-    const form = $(this)[0];
-    const formData = new FormData(form);
-    const action = $(this).attr('action');
-
-    // Önce hataları temizle
-    $("#error_category_id").remove();
-
-    $.ajax({
-        url: action,
-        type: 'POST',
-        data: formData,
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        processData: false,
-        contentType: 'application/json',
-        success: function (res) {
-            // Başarılı olursa yönlendirme veya mesaj
-            alert('Elan uğurla əlavə edildi');
-            // window.location.href = '/some-success-url'; // istersen yönlendir
-        },
-        error: function (xhr) {
-            if (xhr.status === 422) {
-                
-                const errors = xhr.responseJSON.errors;
-
-                $('.text-red-500.error-message').remove();
-
-                Object.keys(errors).forEach(function (field) {
-                    const msg = errors[field][0];
-
-                    // İlgili input'u bul
-                    const input = $(`[name="${field}"]`);
-
-                    if (input.length) {
-                        // Hatanın input altına yazılması
-                        const errorHtml = `<div class="text-danger error-message">${msg}</div>`;
-
-                        // Eğer input bir checkbox ise, üst div'e ekle
-                        if (input.attr('type') === 'checkbox') {
-                            input.closest('.form-check').append(errorHtml);
-                        } else {
-                            input.after(errorHtml);
-                        }
-                    }
-                });
-
-                // let errorList = '';
-
-                // Object.keys(errors).forEach(function (field) {
-                //     const msg = errors[field][0];
-                //     errorList += `<li>${msg}</li>`;
-
-                //     const input = $(`[name="${field}"]`);
-                // });
-
-                // $('#formErrors').removeClass('d-none').html(`<ul class="mb-0">${errorList}</ul>`);
-            } else {
-                $('#formErrors').removeClass('d-none').text('Bilinməyən xəta baş verdi.');
             }
-        }
+        });
     });
 });
-
-
 </script>
 @endsection

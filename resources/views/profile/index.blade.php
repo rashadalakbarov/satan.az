@@ -11,7 +11,7 @@
             <h3>
                 <a href="{{route('profile.index')}}" class="text-decoration-none text-black">Şəxsi kabinet</a>
             </h3>
-            <p class="fw-bold text-muted">Xoş gəldin, {{ Auth::guard('phone')->user()->name === '' ? Auth::guard('phone')->user()->phone : Auth::guard('phone')->user()->name }}!</p>
+            <p class="fw-bold text-muted">Xoş gəldin, <span class="text-capitalize">{{ Auth::guard('phone')->user()->name === '' ? Auth::guard('phone')->user()->phone : Auth::guard('phone')->user()->name }}!</span></p>
         </div>
     </div>
 </div>
@@ -137,17 +137,17 @@
                 <h3 class="text-capitalize fw-bold my-5 text-center text-md-start">Profilə düzəliş et</h3>
                 
                 <div class="col-12 col-md-6">
-                    <form action="{{route('profile.user.update', Auth::guard('phone')->user()->phone)}}" method="POST">
+                    <form action="{{route('profile.user.update', Auth::guard('phone')->user()->phone)}}" method="POST" autocomplete="off">
                         @csrf
                         @method('PUT')
                         <div class="mb-3">
                             <label for="exampleName" class="form-label">Adınız</label>
-                            <input type="text" class="form-control" id="exampleName" name="exampleName" value="{{old('exampleName', Auth::guard('phone')->user()->name)}}">
+                            <input type="text" class="form-control" id="exampleName" name="exampleName" value="{{old('exampleName', Auth::guard('phone')->user()->name)}}" required>
                             @error('exampleName') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
                         <div class="mb-3">
                             <label for="exampleEmail" class="form-label">E-mail</label>
-                            <input type="text" class="form-control" id="exampleEmail" name="exampleEmail" value="{{old('exampleEmail', Auth::guard('phone')->user()->email)}}">
+                            <input type="email" class="form-control" id="exampleEmail" name="exampleEmail" value="{{old('exampleEmail', Auth::guard('phone')->user()->email)}}" required>
                             @error('exampleEmail') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
                         <button type="submit" class="btn btn-outline-success">Yadda saxla</button>

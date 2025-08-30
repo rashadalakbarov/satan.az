@@ -42,9 +42,18 @@ class AuthController extends Controller
         // Sadece örnek:
         logger("OTP kodu: $otp");
 
-        return view('client.verify-otp',  [
-            'phone' => $phoneotp->phone,
-            'otp' => $phoneotp->otp
+        // return view('client.verify-otp',  [
+        //     'phone' => $phoneotp->phone,
+        //     'otp' => $phoneotp->otp
+        // ]);
+
+        return redirect()->route('verify-otp.form', ['phone' => $phoneotp->phone]);
+    }
+
+    public function verifyOtpForm(Request $request)
+    {
+        return view('client.verify-otp', [
+            'phone' => $request->phone
         ]);
     }
 
@@ -62,8 +71,15 @@ class AuthController extends Controller
                     ->where('otp_expires_at', '>', now())
                     ->first();
 
+        // if (!$phoneotp) {
+        //     return redirect()->route('verify-otp')->withErrors(['phone' => 'OTP kod keçərsizdir ya da vaxtı bitmişdir.']);
+        // }
+
         if (!$phoneotp) {
-            return back()->withErrors(['otp' => 'OTP kod keçərsizdir ya da vaxtı bitmişdir.']);
+            // Hata mesajını OTP alanına bağlayalım
+            return redirect()->route('verify-otp')->withErrors([
+                'otp' => 'OTP kod keçərsizdir ya da vaxtı bitmişdir.'
+            ])->withInput();
         }
 
         if ($phoneotp && $phoneotp->otp === $request->otp) {

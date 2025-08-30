@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
             'username' => "johndoe",
             'email' => 'johndoe@gmail.com',
             'password' => Hash::make('Password123!'),
-            'phone' => '+994558215673',
+            'phone' => '+99455 821 56 73',
         ]);
     }
 }

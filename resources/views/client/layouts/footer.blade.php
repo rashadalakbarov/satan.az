@@ -33,7 +33,7 @@
                         <li><a href="{{ route('index') }}" class="text-decoration-none">Ana Səhifə</a></li>
                         <li><a href="{{route('about')}}" class="text-decoration-none {{ request()->routeIs('about') ? 'text-danger' : '' }}">Haqqımızda</a></li>
                         <li><a href="{{route('rules')}}" class="text-decoration-none {{ request()->routeIs('rules') ? 'text-danger' : '' }}">Qaydalar</a></li>
-                        <li><a href="" class="text-decoration-none">Əlaqə</a></li>
+                        <li><a href="{{route('contact')}}" class="text-decoration-none {{ request()->routeIs('contact') ? 'text-danger' : '' }}">Əlaqə</a></li>
                     </ul>
                 </div>
             </div>

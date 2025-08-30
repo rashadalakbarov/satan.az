@@ -8,4 +8,7 @@
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{route('about')}}">Haqqımızda</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{route('contact')}}">Əlaqə</a>
+    </li>
 </ul>

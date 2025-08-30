@@ -19,8 +19,7 @@
                         @endforeach
                     </ol>
                 @endif
-            </li>
-            
+            </li>            
             @endforeach
         </ol>
     </div>
