@@ -14,7 +14,7 @@
         <h1 class="text-center mb-5 fs-2">Yeni elan</h1>
         <div class="row">
             <div class="col-12 col-xl-8 order-2 order-xl-1">
-                <form id="myForm">
+                <form id="myForm" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group mb-3">
                         <label for="inputName">Adınız</label>
@@ -76,6 +76,22 @@
                         <div class="text-danger" id="errTextareaAdd"></div>
                     </div>
 
+                    <!-- <div class="form-group mb-3">
+                        <label for="files">Şəkillər</label>
+                        <input type="file" id="files" name="files[]" class="form-control" accept="image/jpeg,image/png,image/gif" multiple>
+                        <div class="text-danger" id="errMultiImg"></div>
+                    </div>
+                    <div id="previewArea" class="d-flex flex-wrap gap-2"></div> -->
+
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input mb-2" multiple name="files[]" id="files" accept="image/jpeg, image/png, image/gif," aria-describedby="helpImage" title="Şəkillər toplu halda seçilməlidir. Sonradan əlavə olunan şəkil əvvəldən toplu halda yüklənmiş şəkilləri silir.">
+                        <label class="custom-file-label" for="files">Şəkil toplu halda seçin</label>
+                        <small id="helpImage" class="form-text text-muted">Bir şəkilin maksimal həcmi 10 MB olmalıdır</small>
+                        <div class="text-danger w-100" id="errMultiImg"></div>
+                    </div>
+
+                    <div id="previewArea" class="d-flex flex-wrap gap-2"></div>
+
                     <hr style="margin:30px 0">
 
                     <p class="mt-3">Siz elan yerləşdirərkən satan.az saytının <a href="{{route('rules')}}">qaydalarıyla</a> razı olduğunuzu təsdiqləmiş olursunuz.</p>
@@ -103,19 +119,168 @@
 
 @section('javascript')
 <script>
-$(document).ready(function() {
+$(document).ready(function() { 
+    const uploader = handleMultiImageUpload(
+        "#files",
+        "#previewArea",
+        "#errMultiImg"
+    );
+
+    // handle Multi Upload
+    function handleMultiImageUpload(
+        fileInputSelector,
+        previewContainerSelector,
+        errorSelector
+    ) {
+        const fileInput = $(fileInputSelector);
+        const previewContainer = $(previewContainerSelector);
+        const errMsg = $(errorSelector);
+
+        // { file, sig } siyahısı və duplikatları izləmək üçün Set
+        let items = [];
+        const sigSet = new Set();
+
+        // Fayl üçün unikal imza
+        const makeSig = (f) => `${f.name}__${f.size}__${f.lastModified || 0}`;
+
+        // Yalnız şəkilmi? (mime + uzantı fallback)
+        const isImage = (f) => {
+            const okType =
+                f.type === "image/png" ||
+                f.type === "image/jpeg" || // jpg/jpeg
+                f.type === "image/gif" ||
+                f.type === "image/jpg";
+            const okExt = /\.(png|jpe?g|gif)$/i.test(f.name);
+            return okType || okExt;
+        };
+
+        // Status mesajı
+        const setError = (msg) => errMsg.text(msg || " ");
+
+        // Limit/min yoxlaması
+        const refreshStatus = () => {
+            if (items.length < 3) setError("Ən azı 3 şəkil seçməlisiniz.");
+            else if (items.length > 40)
+                setError("Ən çox 40 şəkil seçə bilərsiniz.");
+            else setError(" ");
+        };
+
+        // Tək preview (pip) yarat
+        const createPreview = (file, sig) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const $pip = $(`
+        <div class="pip d-inline-block m-1 position-relative" data-sig="${sig}">
+          <img src="${e.target.result}" class="img-thumbnail" style="width:100px;height:100px;object-fit:cover;">
+          <button type="button" class="remove btn btn-sm btn-danger position-absolute" style="top:0;right:0;">&times;</button>
+        </div>
+      `);
+
+                // Sil düyməsi
+                $pip.find(".remove").on("click", function () {
+                    // imza üzrə sil
+                    items = items.filter((it) => it.sig !== sig);
+                    sigSet.delete(sig);
+                    $pip.remove();
+                    refreshStatus();
+                });
+
+                previewContainer.append($pip);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Dəyişiklikdə yeni faylları əlavə et
+        fileInput.on("change", function () {
+            const selected = Array.from(fileInput.get(0).files);
+
+            // Cancel edilibsə
+            if (selected.length === 0) return;
+
+            for (const file of selected) {
+                // Şəkil deyil → xəbərdarlıq et, keç
+                if (!isImage(file)) {
+                    setError("Bu fayl şəkil deyil: " + file.name);
+                    continue;
+                }
+
+                const sig = makeSig(file);
+
+                // Duplikat yoxlaması
+                if (sigSet.has(sig)) {
+                    setError("Bu şəkil artıq əlavə olunub: " + file.name);
+                    continue;
+                }
+
+                // Max limit
+                if (items.length >= 40) {
+                    setError("Ən çox 40 şəkil seçə bilərsiniz.");
+                    break;
+                }
+
+                // Qəbul et və pip yarat
+                items.push({ file, sig });
+                sigSet.add(sig);
+                createPreview(file, sig);
+            }
+
+            refreshStatus();
+
+            // Eyni faylı təkrar seçə bilmək üçün reset
+            fileInput.val("");
+        });
+
+        // Kənardan faylları götürmək üçün
+        return {
+            getFiles: () => items.map((it) => it.file),
+            clearAll: () => {
+                items = [];
+                sigSet.clear();
+                previewContainer.empty();
+                refreshStatus();
+            },
+        };
+    }
+
     $('#myForm').submit(function(e) {
         e.preventDefault(); // Formun normal submit olmasını engelle
 
          // Tüm hata mesajlarını temizle
         $('.text-danger').text('');
+        $('#errMultiImg').text('');
+
+        let formData = new FormData();
+
+        // digər inputları əlavə et (file deyilənlərdən başqa)
+        $('#myForm').find("input, select, textarea").each(function() {
+            if (this.type !== "file") {
+                formData.append(this.name, $(this).val());
+            }
+        });
+
+        // Şəkilləri əlavə et
+        const files = uploader.getFiles();
+        for (let i = 0; i < files.length; i++) {
+            formData.append("files[]", files[i]);
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
 
         $.ajax({
             url: '{{ route("new.store") }}', // Controller route
             method: 'POST',
-            data: $(this).serialize(),
+            data: formData,
+            processData: false, // FormData üçün lazım
+            contentType: false, // FormData üçün lazım
             success: function(response) {
                 alert(response.message); // Başarılı mesaj
+                selectedFiles = [];
+                $('#previewArea').empty();
                 $('#myForm')[0].reset();
             },
             error: function(xhr) {
@@ -128,6 +293,8 @@ $(document).ready(function() {
                     if (errors.inputElanTitle) $('#errInputElanTitle').text(errors.inputElanTitle[0]);
                     if (errors.inputPrice) $('#errInputPrice').text(errors.inputPrice[0]);
                     if (errors.textareaAdd) $('#errTextareaAdd').text(errors.textareaAdd[0]);
+                    if (errors.files) $('#errMultiImg').text(errors.files[0]);
+                    if (errors['files.*']) $('#errMultiImg').text(errors['files.*'][0]);
                 } else {
                     alert('Xəta baş verdi, yenidən cəhd edin.');
                 }

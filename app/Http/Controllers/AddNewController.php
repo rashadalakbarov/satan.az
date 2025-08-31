@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\City;
 use App\Models\Elan;
+use App\Models\Image;
 use App\Models\Category;
 use App\Models\Option;
 use App\Models\OptionValue;
@@ -78,6 +79,8 @@ class AddNewController extends Controller
                 'string',
                 'min:15', // minimum 15 simvol
             ],
+            'files' => ['required', 'array', 'min:3', 'max:40'],
+            'files.*' => ['file', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
         ], [
             'inputName.required' => 'Ad daxil edilməlidir.',
             'inputName.min' => 'Ad ən azı 2 simvol olmalıdır.',
@@ -101,6 +104,14 @@ class AddNewController extends Controller
 
             'textareaAdd.required' => 'Məzmun daxil edilməlidir.',
             'textareaAdd.min' => 'Məzmun ən azı 15 simvol olmalıdır.',
+
+            'files.required' => 'Ən azı 3 şəkil yükləməlisiniz.',
+            'files.array' => 'Fayllar düzgün formatda olmalıdır.',
+            'files.min' => 'Ən azı 3 şəkil yükləməlisiniz.',
+            'files.max' => 'Ən çox 40 şəkil yükləyə bilərsiniz.',
+            'files.*.image' => 'Seçilmiş fayl şəkil olmalıdır.',
+            'files.*.mimes' => 'Yalnız jpg, jpeg, png və gif faylları qəbul olunur.',
+            'files.*.max' => 'Hər fayl maksimum 10MB ola bilər.',
         ]);
 
         if ($validator->fails()) {
@@ -137,6 +148,23 @@ class AddNewController extends Controller
         $elan->city_id = $request->selectCity;
         $elan->description = $request->textareaAdd;
         $elan->save();
+
+        // image upload
+        $uploadedFiles = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('advert', 'public'); // storage/app/public/advert
+                $filename = basename($path);
+
+                // DB-yə yalnız fayl adı əlavə et
+                $image = new Image();
+                $image->path = $filename;
+                $image->elan_id = $elan->id;
+                $image->save();
+
+                $uploadedFiles[] = $filename;
+            }
+        }
 
         // Başarılı durum: veri kaydet veya başka işlem
         return response()->json([

@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             ElanSeeder::class,
+            ImageSeeder::class,
             ElanOptionSeeder::class,
             OptionSeeder::class,
             OptionValueSeeder::class,

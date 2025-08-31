@@ -15,6 +15,8 @@
         <meta name="revisit-after" content="1 days">
         <meta data-rh="true" id="meta-description" name="description" content="Pulsuz Elan Yerləşdir - Maşın, Mənzil, Telefon, Geyim, Məişət texnikası...">
 
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
         <!-- Title & Favicon -->
         <title>{{ $company['name'] ?? "Satan.az" }} | @yield('title', 'Pulsuz Elanlar Saytı')</title>
         <link rel="shortcut icon" href="{{ isset($company['favicon']) ? asset('/storage/favicon/' . $company['favicon']) : asset('front/assets/img/favicon.png') }}" type="image/jpg">
