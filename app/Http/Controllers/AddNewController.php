@@ -51,68 +51,78 @@ class AddNewController extends Controller
     }
 
     public function store(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'inputName' => [
-                'required',
-                'string',
-                'min:2',
-                'regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ\s]+$/u' // AZ/EN harfleri ve boşluk
-            ],
-            'inputEmail' => 'required|email',
-            'inputPhone' => [
-                'required',
-                'regex:/^0[0-9]{9}$/'
-            ],
-            'selectCity' => 'required|exists:cities,id',
-            'inputElanTitle' => [
-                'required',
-                'string',
-                'min:3',
-                'regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ0-9\s-]+$/u' // JS regex-in eyni forması
-            ],
-            'inputPrice' => [
-                'required',
-                'regex:/^[0-9]+$/', // yalnız rəqəm
-            ],
-            'textareaAdd' => [
-                'required',
-                'string',
-                'min:15', // minimum 15 simvol
-            ],
-            'files' => ['required', 'array', 'min:3', 'max:40'],
-            'files.*' => ['file', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
-        ], [
+        /**
+         * 1. Sabit kurallar
+         */
+        $rules = [
+            'inputName'      => ['required','string','min:2','regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ\s]+$/u'],
+            'inputEmail'     => 'required|email',
+            'inputPhone'     => ['required','regex:/^0[0-9]{9}$/'],
+            'selectCity'     => 'required|exists:cities,id',
+            'inputElanTitle' => ['required','string','min:3','regex:/^[A-Za-zƏəÖöÜüİIıŞşÇçĞğ0-9\s-]+$/u'],
+            'inputPrice'     => ['required','regex:/^[0-9]+$/'],
+            'textareaAdd'    => ['required','string','min:15'],
+            'files'          => ['required','array','min:3','max:40'],
+            'files.*'        => ['file','image','mimes:jpg,jpeg,png,gif','max:10240'],
+            'category_id'    => 'required|exists:categories,id',
+        ];
+
+        /**
+         * 2. Dinamik alanlar
+         *  option_1, option_2, option_99 gibi her input için kural ekliyoruz
+         *  eğer JS tarafında "required" attribute varsa ona göre 'required' ekliyoruz
+         */
+        foreach ($request->all() as $key => $value) {
+            if (preg_match('/^option_\d+$/', $key)) {
+                // Blade tarafında required attr var mı yok mu kontrolü
+                // attr server tarafında da gelmediyse istersen DB'den de alabilirsin
+                // Şimdilik basit: dolu ise nullable|string, boş ise required|string
+                $rules[$key] = $request->has($key) && $request->$key !== ''
+                    ? 'nullable|string|max:255'
+                    : 'required|string|max:255';
+            }
+        }
+
+        /**
+         * 3. Validator
+         */
+        $messages = [
             'inputName.required' => 'Ad daxil edilməlidir.',
-            'inputName.min' => 'Ad ən azı 2 simvol olmalıdır.',
-            'inputName.regex' => 'Ad yalnız hərf və boşluqlardan ibarət olmalıdır.',
+            'inputName.min'      => 'Ad ən azı 2 simvol olmalıdır.',
+            'inputName.regex'    => 'Ad yalnız hərf və boşluqlardan ibarət olmalıdır.',
 
             'inputEmail.required' => 'Email daxil edin.',
-            'inputEmail.email' => 'Email düzgün formatda olmalıdır.',
-            
+            'inputEmail.email'    => 'Email düzgün formatda olmalıdır.',
+
             'inputPhone.required' => 'Telefon nömrəsi daxil edin.',
-            'inputPhone.regex' => 'Telefon 10 rəqəmli olmalı, 0 ilə başlamalı və yalnız rəqəmlərdən ibarət olmalıdır.',
+            'inputPhone.regex'    => 'Telefon 10 rəqəmli olmalı, 0 ilə başlamalıdır.',
 
             'selectCity.required' => 'Şəhər seçilməlidir.',
-            'selectCity.exists' => 'Seçilən şəhər mövcud deyil.',
+            'selectCity.exists'   => 'Seçilən şəhər mövcud deyil.',
 
             'inputElanTitle.required' => 'Elan adı daxil edilməlidir.',
-            'inputElanTitle.min' => 'Elan adı ən azı 3 simvol olmalıdır.',
-            'inputElanTitle.regex' => "Elan adı yalnız hərf, rəqəm, boşluq və '-' işarəsi ola bilər.",
+            'inputElanTitle.min'      => 'Elan adı ən azı 3 simvol olmalıdır.',
+            'inputElanTitle.regex'    => "Elan adı yalnız hərf, rəqəm, boşluq və '-' işarəsi ola bilər.",
 
             'inputPrice.required' => 'Qiymət boş ola bilməz.',
-            'inputPrice.regex' => 'Qiymət yalnız rəqəmlərdən ibarət olmalıdır.',
+            'inputPrice.regex'    => 'Qiymət yalnız rəqəmlərdən ibarət olmalıdır.',
 
             'textareaAdd.required' => 'Məzmun daxil edilməlidir.',
-            'textareaAdd.min' => 'Məzmun ən azı 15 simvol olmalıdır.',
+            'textareaAdd.min'      => 'Məzmun ən azı 15 simvol olmalıdır.',
 
-            'files.required' => 'Ən azı 3 şəkil yükləməlisiniz.',
-            'files.array' => 'Fayllar düzgün formatda olmalıdır.',
-            'files.min' => 'Ən azı 3 şəkil yükləməlisiniz.',
-            'files.max' => 'Ən çox 40 şəkil yükləyə bilərsiniz.',
-            'files.*.image' => 'Seçilmiş fayl şəkil olmalıdır.',
-            'files.*.mimes' => 'Yalnız jpg, jpeg, png və gif faylları qəbul olunur.',
-            'files.*.max' => 'Hər fayl maksimum 10MB ola bilər.',
-        ]);
+            'files.required'   => 'Ən azı 3 şəkil yükləməlisiniz.',
+            'files.array'      => 'Fayllar düzgün formatda olmalıdır.',
+            'files.min'        => 'Ən azı 3 şəkil yükləməlisiniz.',
+            'files.max'        => 'Ən çox 40 şəkil yükləyə bilərsiniz.',
+            'files.*.image'    => 'Seçilmiş fayl şəkil olmalıdır.',
+            'files.*.mimes'    => 'Yalnız jpg, jpeg, png və gif faylları qəbul olunur.',
+            'files.*.max'      => 'Hər fayl maksimum 10MB ola bilər.',
+
+            'category_id.required' => 'Kateqoriya seçilməlidir.',
+            'category_id.exists'   => 'Seçilən kateqoriya mövcud deyil.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
@@ -148,6 +158,23 @@ class AddNewController extends Controller
         $elan->city_id = $request->selectCity;
         $elan->description = $request->textareaAdd;
         $elan->save();
+
+        // Seçilen kategoriye ait option'ları al
+        $options = Option::where('category_id', $request->category_id)->get();
+
+        // Her option için kayıt oluştur
+        foreach ($options as $option) {
+            $fieldKey = 'option_' . $option->id;
+
+            if ($request->has($fieldKey)) {
+                ElanOption::create([
+                    'elan_id' => $elan->id, // burayi daha sonra dinamik et
+                    'category_id' => $request->category_id,
+                    'option_id' => $option->id,
+                    'value' => $request->input($fieldKey),
+                ]);
+            }
+        }
 
         // image upload
         $uploadedFiles = [];

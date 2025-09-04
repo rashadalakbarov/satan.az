@@ -42,6 +42,24 @@
                         <div class="text-danger" id="errInputPhone"></div>
                     </div>
 
+                    <div class="form-group mb-3">
+                        <label for="categorySelect">Kateqoriyalar</label>
+                        <select class="form-control" name="category_id" id="categorySelect">
+                            <option value="">Kateqoriya axtar ...</option>
+                            @foreach($mainCategories as $main)
+                                <optgroup label="{{ $main->title }}">
+                                    @foreach($main->children as $sub)
+                                        <option value="{{ $sub->id }}">{{ $sub->title }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                        <div class="text-danger" id="errSelectCategory"></div>
+                    </div>
+
+                    <!-- Dinamik Option Alanları -->
+                    <div id="dynamicOptions" class="row gy-3 mb-3"></div>
+
                     <div class="form-group mb-3" id="selectCityArea">
                         <label for="selectCity">Şəhər</label>
                         <select class="form-control" id="selectCity" name="selectCity">
@@ -75,13 +93,6 @@
                         </div>                        
                         <div class="text-danger" id="errTextareaAdd"></div>
                     </div>
-
-                    <!-- <div class="form-group mb-3">
-                        <label for="files">Şəkillər</label>
-                        <input type="file" id="files" name="files[]" class="form-control" accept="image/jpeg,image/png,image/gif" multiple>
-                        <div class="text-danger" id="errMultiImg"></div>
-                    </div>
-                    <div id="previewArea" class="d-flex flex-wrap gap-2"></div> -->
 
                     <div class="custom-file">
                         <input type="file" class="custom-file-input mb-2" multiple name="files[]" id="files" accept="image/jpeg, image/png, image/gif," aria-describedby="helpImage" title="Şəkillər toplu halda seçilməlidir. Sonradan əlavə olunan şəkil əvvəldən toplu halda yüklənmiş şəkilləri silir.">
@@ -242,6 +253,91 @@ $(document).ready(function() {
         };
     }
 
+    $('#categorySelect').on('change', function () {
+        $("#error_category_id").remove();
+
+        let categoryId = $(this).val();
+
+        $('#dynamicOptions').html('<div class="text-muted">Yüklənir...</div>');
+
+        if (categoryId) {
+            $.ajax({
+                url: `/new/get-options/${categoryId}`,
+                type: 'GET',
+                success: function (options) {
+                    let html = '';
+
+                    options.forEach(option => {
+                        if (option.type === 'check' && option.activate === 'active') {
+                            html += `
+                                <div class="col-md-3">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="option_${option.id}" value="1" id="option${option.id}" ${option.required === '1' ? 'required' : ''}>
+                                        <label class="form-check-label" for="option${option.id}">
+                                            ${option.title}
+                                        </label>
+                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            `;
+                        } else if (option.type === 'select' && option.activate === 'active') {
+                            html += `
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="option${option.id}">${option.title} ${option.required === '1' ? '<span class="text-danger">*</span>' : ''}</label>
+                                        <select class="form-control option-select" name="option_${option.id}" id="option${option.id}" data-option-id="${option.id}" ${option.required === '1' ? 'required' : ''}>
+                                            <option value="">Yüklənir...</option>
+                                        </select>
+                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="option${option.id}">${option.title} ${option.required === '1' ? '<span class="text-danger">*</span>' : ''}</label>
+                                        <input type="text" class="form-control" name="option_${option.id}" id="option${option.id}" ${option.required === '1' ? 'required' : ''}>
+                                        @error('option_${option.id}')<div class="text-red-500 text-sm">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    $('#dynamicOptions').html(html);
+
+                    // select alanlar yüklendikten sonra suboptionları getir
+                    $('.option-select').each(function () {
+                        let optionId = $(this).data('option-id');
+                        let selectElement = $(this);
+
+                        $.ajax({
+                            url: `/new/get-option-values/${optionId}`,
+                            type: 'GET',
+                            success: function (values) {
+                                let optionsHtml = `<option value="">Seçin</option>`;
+                                values.forEach(val => {
+                                    optionsHtml += `<option value="${val}">${val}</option>`;
+                                });
+                                selectElement.html(optionsHtml);
+                            },
+                            error: function () {
+                                selectElement.html('<option value="">Xəta baş verdi</option>');
+                            }
+                        });
+                    });
+
+                },
+                error: function () {
+                    $('#dynamicOptions').html('<div class="text-danger">Optionlar gətirilərkən xəta baş verdi.</div>');
+                }
+            });
+        } else {
+            $('#dynamicOptions').html('');
+        }
+    });
+
     $('#myForm').submit(function(e) {
         e.preventDefault(); // Formun normal submit olmasını engelle
 
@@ -295,6 +391,8 @@ $(document).ready(function() {
                     if (errors.textareaAdd) $('#errTextareaAdd').text(errors.textareaAdd[0]);
                     if (errors.files) $('#errMultiImg').text(errors.files[0]);
                     if (errors['files.*']) $('#errMultiImg').text(errors['files.*'][0]);
+                    if (errors.category_id) $('#errSelectCategory').text(errors.category_id[0]);
+                    
                 } else {
                     alert('Xəta baş verdi, yenidən cəhd edin.');
                 }
